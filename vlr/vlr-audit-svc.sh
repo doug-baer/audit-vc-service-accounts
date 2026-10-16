@@ -1,4 +1,8 @@
 #!/bin/bash
+# ==============================================================================
+# A lightweight audit script to check service account password expiration properties
+# Version 1.0 (October 15, 2026) -Doug Baer
+# ==============================================================================
 
 # Ensure an input file was provided
 if [ -z "$1" ]; then
