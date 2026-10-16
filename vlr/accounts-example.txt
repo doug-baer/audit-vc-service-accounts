@@ -1,0 +1,10 @@
+aps-494673c5-b969-44a1-be82-54eb20cef0c1
+com.vmware.vr-sa-d28c9aa4-5bda-47bc-97af-714d9c2cfe54
+com.vmware.vsan.snapservice-c3d7d573-15da-427d-89f5-77c0223645a7
+dr-backup-1ed2592d-97d4-41c4-8479-a3fc4fc4ec2e
+dr-rest-sa-553d6864-c207-4290-a561-ac7c36b064f3
+h5-dr-sa-e934a9d0-127f-423c-99bd-6e49d2e295ca
+ims-8d4794e3-6f1f-4c28-b96a-94b3bc8de93f
+SRM-faa7cd58-9fac-4e1d-8a3d-423044c91799
+SRM-remote-ba4da742-8214-4332-9194-1e4c49845051
+vsansvc-36a2eae3-6266-4443-a2c4-9cedf209aaa0
