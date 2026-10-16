@@ -11,21 +11,22 @@ These scripts should be run on the vCenter and require SSO administrative creden
 Some useful commands
 
 # Obtain a list of all service accounts
-/usr/lib/vmware-vmafd/bin/dir-cli svcaccount list
+`/usr/lib/vmware-vmafd/bin/dir-cli svcaccount list`
 
 # Obtain details about a specific account
-/usr/lib/vmware-vmafd/bin/dir-cli user find-by-name --account <ACCOUNT_NAME> --level 2
+`/usr/lib/vmware-vmafd/bin/dir-cli user find-by-name --account <ACCOUNT_NAME> --level 2`
 
 # Set password to never expire
-/usr/lib/vmware-vmafd/bin/dir-cli user modify --account <ACCOUNT_NAME> --password-never-expires
+`/usr/lib/vmware-vmafd/bin/dir-cli user modify --account <ACCOUNT_NAME> --password-never-expires`
 
 # Set the global SSO policy to not expire passwords (replace 0 with a number of days to change the policy)
-/opt/likewise/bin/ldapmodify -x -D "cn=Administrator,cn=Users,dc=vsphere,dc=local" -W <<EOF 
+```/opt/likewise/bin/ldapmodify -x -D "cn=Administrator,cn=Users,dc=vsphere,dc=local" -W <<EOF 
 dn: cn=password and lockout policy,dc=vsphere,dc=local
 changetype: modify
 replace: vmwPasswordLifetimeDays
 vmwPasswordLifetimeDays: 0
 EOF
+```
 
 NOTE: these scripts use a hardcoded "vsphere.local" SSO domain and woud need to be modified if you have changed your default SSO domain.
 
