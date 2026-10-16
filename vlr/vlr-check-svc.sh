@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # VCF 9.x Protection & Recovery Service Account Audit & Verification
-# Version 1.3 (October 14, 2026) -Doug Baer
+# Version 1.4 (October 14, 2026) -Doug Baer
 # Original script -- suggest using vlr-get-accounts.sh + vlr-audit-svc.sh instead
 #
 # ==============================================================================
@@ -32,7 +32,7 @@ SOL_USERS=$(${DIR_CLI} service list --login "${SSO_ADMIN}" --password "${SSO_PAS
 STD_USERS=$(${DIR_CLI} user list --login "${SSO_ADMIN}" --password "${SSO_PASS}" 2>/dev/null | awk '{print $NF}')
 
 # Combine and filter for Protection & Recovery related accounts
-ALL_DISCOVERED=$(echo -e "${SVC_ACCTS}\n${SOL_USERS}\n${STD_USERS}" | sort -u | grep -E -i "aps-|srm-|snapservice|hms-|vr-sa|vsan|ims-|dr-backup" || true)
+ALL_DISCOVERED=$(echo -e "${SVC_ACCTS}\n${SOL_USERS}\n${STD_USERS}" | sort -u | grep -E -i "aps-|srm-|snapservice|hms-|vr-sa|vsan|ims-|h5-dr-|dr-" || true)
 
 if [[ -z "${ALL_DISCOVERED}" ]]; then
     echo "[-] No accounts matched known filter patterns. Dumping all registered service accounts:"
