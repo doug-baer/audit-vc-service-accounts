@@ -19,7 +19,7 @@ Some useful commands
 # Set password to never expire
 `/usr/lib/vmware-vmafd/bin/dir-cli user modify --account <ACCOUNT_NAME> --password-never-expires`
 
-# Set the global SSO policy to not expire passwords (replace 0 with a number of days to change the policy)
+# Set the global SSO policy to not expire passwords
 
 ```
 /opt/likewise/bin/ldapmodify -x -D "cn=Administrator,cn=Users,dc=vsphere,dc=local" -W <<EOF 
