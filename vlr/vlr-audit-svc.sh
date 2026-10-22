@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # A lightweight audit script to check service account password expiration properties
-# Version 1.0 (October 15, 2026) -Doug Baer
+# Version 1.1 (October 22, 2026) -Doug Baer
 # ==============================================================================
 
 # Ensure an input file was provided
@@ -17,14 +17,32 @@ if [ ! -f "$ACCOUNTS_FILE" ]; then
     exit 1
 fi
 
+# Detect default SSO domain from the appliance
+DETECTED_DOMAIN=$(/usr/lib/vmware-vmafd/bin/vmafd-cli get-domain-name --server-name localhost 2>/dev/null)
+DEFAULT_DOMAIN="${DETECTED_DOMAIN:-vsphere.local}"
+
+# 1. Prompt for SSO domain (pressing Enter accepts the default)
+read -r -p "Enter SSO domain [${DEFAULT_DOMAIN}]: " INPUT_DOMAIN < /dev/tty
+SSO_DOMAIN="${INPUT_DOMAIN:-$DEFAULT_DOMAIN}"
+
+# Construct the LDAP Base DN dynamically (e.g., vsphere.local -> dc=vsphere,dc=local)
+BASE_DN="dc=$(echo "$SSO_DOMAIN" | sed 's/\./,dc=/g')"
+SSO_ADMIN="administrator@${SSO_DOMAIN}"
+ADMIN_DN="cn=Administrator,cn=Users,${BASE_DN}"
+
 # Prompt once for SSO Administrator password securely
-read -s -p "Enter password for administrator@vsphere.local: " SSO_PASS < /dev/tty
+read -s -p "Enter password for ${SSO_ADMIN}: " SSO_PASS < /dev/tty
 echo ""
 
 if [ -z "$SSO_PASS" ]; then
     echo "Error: Password cannot be blank."
     exit 1
 fi
+
+echo ""
+echo "Using Domain  : ${SSO_DOMAIN}"
+echo "LDAP Base DN  : ${BASE_DN}"
+echo "Admin Identity: ${SSO_ADMIN}"
 
 # Print table header
 HEADER_FMT="%-12s | %-18s | %-16s | %-14s | %-45s"
@@ -41,9 +59,9 @@ while IFS= read -r ACCOUNT_NAME || [ -n "$ACCOUNT_NAME" ]; do
 
     # 1. Retrieve userAccountControl bitmask via LDAP
     UAC_VAL=$(/opt/likewise/bin/ldapsearch -LLL -h localhost -p 389 -x \
-        -D "cn=Administrator,cn=Users,dc=vsphere,dc=local" \
+        -D "${ADMIN_DN}" \
         -w "${SSO_PASS}" \
-        -b "dc=vsphere,dc=local" \
+        -b "${BASE_DN}" \
         "(|(cn=${ACCOUNT_NAME})(sAMAccountName=${ACCOUNT_NAME}))" userAccountControl 2>/dev/null \
         | awk '/^userAccountControl:/ {print $2}' | head -n 1)
 
@@ -53,7 +71,7 @@ while IFS= read -r ACCOUNT_NAME || [ -n "$ACCOUNT_NAME" ]; do
     DIR_OUTPUT=$(/usr/lib/vmware-vmafd/bin/dir-cli user find-by-name \
         --account "${ACCOUNT_NAME}" \
         --level 2 \
-        --login "administrator@vsphere.local" \
+        --login "${SSO_ADMIN}" \
         --password "${SSO_PASS}" 2>/dev/null)
 
     # Parse expiration flags

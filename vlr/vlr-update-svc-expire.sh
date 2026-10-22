@@ -4,7 +4,7 @@
 #  - set account to have a non-expiring password
 #  - set account to un-expire the current password
 # Optionally log output to a file (specify as second parameter)
-# Version 1.0 (October 15, 2026) -Doug Baer
+# Version 1.1 (October 22, 2026) -Doug Baer
 # ==============================================================================
 
 # Ensure an input file was provided
@@ -23,8 +23,18 @@ fi
 # Define log file name (custom argument or timestamped default)
 LOG_FILE="${2:-update_accounts_$(date +%Y%m%d_%H%M%S).log}"
 
-# Prompt for the SSO password BEFORE starting logging to keep credentials out of the log
-read -s -p "Enter password for administrator@vsphere.local: " SSO_PASS < /dev/tty
+DETECTED_DOMAIN=$(/usr/lib/vmware-vmafd/bin/vmafd-cli get-domain-name --server-name localhost 2>/dev/null)
+DEFAULT_DOMAIN="${DETECTED_DOMAIN:-vsphere.local}"
+read -r -p "Enter SSO domain [${DEFAULT_DOMAIN}]: " INPUT_DOMAIN < /dev/tty
+SSO_DOMAIN="${INPUT_DOMAIN:-$DEFAULT_DOMAIN}"
+
+# Construct the LDAP Base DN dynamically (e.g., vsphere.local -> dc=vsphere,dc=local)
+BASE_DN="dc=$(echo "$SSO_DOMAIN" | sed 's/\./,dc=/g')"
+SSO_ADMIN="administrator@${SSO_DOMAIN}"
+ADMIN_DN="cn=Administrator,cn=Users,${BASE_DN}"
+
+# 2. Prompt for SSO password BEFORE starting logging to keep credentials out of the log
+read -s -p "Enter password for ${SSO_ADMIN}: " SSO_PASS < /dev/tty
 echo ""
 
 if [ -z "$SSO_PASS" ]; then
@@ -59,7 +69,7 @@ while IFS= read -r ACCOUNT_NAME || [ -n "$ACCOUNT_NAME" ]; do
     /usr/lib/vmware-vmafd/bin/dir-cli user find-by-name \
         --account "${ACCOUNT_NAME}" \
         --level 2 \
-        --login "administrator@vsphere.local" \
+        --login "${SSO_ADMIN}" \
         --password "${SSO_PASS}"
 
     # 2. Modify password expiry policy in SSO
@@ -67,15 +77,15 @@ while IFS= read -r ACCOUNT_NAME || [ -n "$ACCOUNT_NAME" ]; do
     /usr/lib/vmware-vmafd/bin/dir-cli user modify \
         --account "${ACCOUNT_NAME}" \
         --password-never-expires \
-        --login "administrator@vsphere.local" \
+        --login "${SSO_ADMIN}" \
         --password "${SSO_PASS}"
 
     # 3. Modify userAccountControl bitmask via LDAP (66048 = NORMAL_ACCOUNT + DONT_EXPIRE_PASSWORD)
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [-] Updating userAccountControl in LDAP..."
     /opt/likewise/bin/ldapmodify -x -h localhost -p 389 \
-        -D "cn=Administrator,cn=Users,dc=vsphere,dc=local" \
+        -D "${ADMIN_DN}" \
         -w "${SSO_PASS}" <<EOF
-dn: cn=${ACCOUNT_NAME},cn=ServicePrincipals,dc=vsphere,dc=local
+dn: cn=${ACCOUNT_NAME},cn=ServicePrincipals,${BASE_DN}
 changetype: modify
 replace: userAccountControl
 userAccountControl: 66048
