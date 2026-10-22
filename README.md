@@ -3,7 +3,7 @@ Scripts to audit vCenter service accounts, specifically targeting protection and
 
 These scripts should be run on the vCenter and require SSO administrative credentials to be provided during execution.
 
-New, Consolidated (Use this one!)
+New, Consolidated (Use this one unless you want to step through the process and have tighter control of which accounts are updated)
 * vlr-manage-accounts.sh -- handles Discovery, Audit, Remediation, Verification
 
 Legacy
