@@ -3,6 +3,10 @@ Scripts to audit vCenter service accounts, specifically targeting protection and
 
 These scripts should be run on the vCenter and require SSO administrative credentials to be provided during execution.
 
+New, Consolidated (Use this one!)
+* vlr-manage-accounts.sh -- handles Discovery, Audit, Remediation, Verification
+
+Legacy
 * vlr-check-svc.sh -- original script to gather information about VLR-specific service accounts, also lists critical group membership
 * vlr-get-accounts.sh -- returns a list of accounts matching known patterns (related to VLR)
 * vlr-audit-svc.sh -- returns password-specific properties for the provided accounts
@@ -29,6 +33,6 @@ vmwPasswordLifetimeDays: 0
 EOF
 ```
 
-NOTE: these scripts use a hardcoded "vsphere.local" SSO domain and woud need to be modified if you have changed your default SSO domain.
+NOTE: updated scripts to detect local SSO domain in case it is not default "vsphere.local"
 
-October 16, 2026
+October 22, 2026

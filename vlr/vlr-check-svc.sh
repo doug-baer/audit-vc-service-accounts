@@ -2,7 +2,8 @@
 # ==============================================================================
 # VCF 9.x Protection & Recovery Service Account Audit & Verification
 # Version 1.4 (October 14, 2026) -Doug Baer
-# Original script -- suggest using vlr-get-accounts.sh + vlr-audit-svc.sh instead
+#
+# Original script -->> USE vlr-manage-accounts.sh instead
 #
 # ==============================================================================
 
