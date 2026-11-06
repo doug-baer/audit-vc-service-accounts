@@ -75,7 +75,7 @@ else
         | sed "s/@${SSO_DOMAIN}//g; s/@vsphere.local//g" \
         | tr -d '\r' \
         | awk '{$1=$1};1' \
-        | grep -E -i "^(aps-|srm-|snapservice|hms-|vr-sa|vsan|ims-|h5-dr-|dr-sa-)" \
+        | grep -E -i "^(aps-|srm-|snapservice|hms-|vr-sa|vsan|ims-|h5-dr-|dr-)" \
         | sort -u)
 fi
 
